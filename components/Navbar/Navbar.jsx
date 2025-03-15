@@ -10,7 +10,7 @@ import SearchDrawer from "./SearchDrawer";
 import ProductDrawer from "./ProductDrawer";
 import AdminDrawer from "./AdminDrawer";
 import MobileMenu from "./MobileMenu";
-import NavbarLinks from "./NavbarLinks";
+import NavbarLinks from "./Navbarlinks";
 import UserSection from "./UserSection";
 import { Input } from "../ui/input";
 
