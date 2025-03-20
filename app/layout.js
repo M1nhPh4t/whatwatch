@@ -10,8 +10,8 @@ const poppins = Poppins({ subsets: ["latin"], weight: "400" });
 const playfair = Playfair_Display({subsets:["latin"]})
 
 export const metadata = {
-  title: "EcommerceApp",
-  description: "Ecommerce Store that sells Watches!",
+  title: "WhatWatch",
+  description: "Định hình thời gian trong tầm tay",
 };
 
 export default function RootLayout({ children }) {
