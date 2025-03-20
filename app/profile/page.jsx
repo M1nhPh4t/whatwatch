@@ -25,6 +25,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import toast, { Toaster } from "react-hot-toast";
 import OrdersList from "@/components/OrdersList";
 import Wishlist from "@/components/Wishlist";
+import UserList from "@/components/UserList";
 import SettingsComponent from "@/components/Settings";
 
 const ProfilePage = () => {
@@ -37,6 +38,7 @@ const ProfilePage = () => {
     image: "",
   });
   const [activeTab, setActiveTab] = useState("profile");
+  const renderUserListContent = () => <UserList />;
 
   useEffect(() => {
     if (session?.user) {
@@ -48,6 +50,27 @@ const ProfilePage = () => {
       });
     }
   }, [session]);
+  
+  useEffect(() => {
+    const fetchProfile = async () => {
+        if (session?.user?.email) {
+            try {
+                const response = await axios.get(`/api/get-user-by-email?email=${session.user.email}`);
+                const user = response.data.user;
+                setProfile({
+                    name: user.name || "",
+                    email: user.email || "",
+                    admin: user.admin || false,
+                    image: user.profileImage || "",
+                });
+            } catch (error) {
+                console.error("Error fetching profile:", error);
+            }
+        }
+    };
+    fetchProfile();
+}, [session]);
+
 
   const handleEdit = () => setIsEditing(true);
 
@@ -63,7 +86,7 @@ const ProfilePage = () => {
       if (res.status === 200) {
         await update({
           ...session,
-          user: { ...session?.user, name: profile.name, email: profile.email },
+          user: { ...session?.user, name: profile.name, email: profile.email, admin: profile.admin },
         });
         setProfile((prevProfile) => ({
           ...prevProfile,
@@ -191,7 +214,7 @@ const ProfilePage = () => {
             <p className="text-gray-500 mb-2">{profile.email}</p>
             {profile.admin && (
               <span className="inline-block bg-indigo-100 text-indigo-800 text-sm font-semibold px-3 py-1 rounded-full">
-                Admin
+                {profile.admin ? "Admin" : 'User'}
               </span>
             )}
           </div>
@@ -201,7 +224,8 @@ const ProfilePage = () => {
               { id: "orders", label: "Orders", icon: ShoppingBag },
               { id: "wishlist", label: "Wishlist", icon: Heart },
               { id: "settings", label: "Settings", icon: Settings },
-            ].map((item) => (
+              profile.admin && { id: "userlist", label: "UserList", icon: UserIcon }, // Chỉ hiển thị nếu là admin
+              ].filter(Boolean).map((item) => ( // Thêm filter(Boolean) để loại bỏ mục false
               <Button
                 key={item.id}
                 variant={activeTab === item.id ? "secondary" : "ghost"}
@@ -232,6 +256,7 @@ const ProfilePage = () => {
           {activeTab === "orders" && <OrdersList />}
           {activeTab === "wishlist" && renderWishlistContent()}
           {activeTab === "settings" && renderSettingsContent()}
+          {activeTab === "userlist" && renderUserListContent()}
         </div>
       </div>
     </div>

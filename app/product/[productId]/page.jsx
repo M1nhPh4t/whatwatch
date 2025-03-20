@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation"; // Import useParams
 import Image from "next/image";
 import useCartStore from "@/store/cartStore";
 import { useSession } from "next-auth/react";
 import toast from "react-hot-toast";
 import ProductDetailsSinglePage from "@/components/ProductDetailsSinglePage.jsx";
 
-export default function ProductPage({ params }) {
+export default function ProductPage() { // Xóa { params }
   const [product, setProduct] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -20,7 +20,7 @@ export default function ProductPage({ params }) {
   const { data: session } = useSession();
   const addItem = useCartStore((state) => state.addItem);
 
-  const { productId } = params;
+  const { productId } = useParams(); // Lấy productId từ useParams
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -50,9 +50,6 @@ export default function ProductPage({ params }) {
       allReviews.length
     : 0;
 
-
-
-
   const fetchAllReveiws = useCallback(async () => {
     try {
       setLoading(true);
@@ -78,14 +75,14 @@ export default function ProductPage({ params }) {
   };
 
   const nextImage = () => {
-    setCurrentImageIndex((prevIndex) => {
-      prevIndex === product.images.length - 1 ? 0 : prevIndex + 1;
-    });
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === product.images.length - 1 ? 0 : prevIndex + 1
+    );
   };
   const prevImage = () => {
-    setCurrentImageIndex((prevIndex) => {
-      prevIndex === product.images.length - 1 ? 0 : prevIndex - 1;
-    });
+    setCurrentImageIndex((prevIndex) =>
+      prevIndex === 0 ? product.images.length - 1 : prevIndex - 1
+    );
   };
 
   const handleAddToCart = () => {

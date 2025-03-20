@@ -1,78 +1,46 @@
-"use client";
-
-import { useState, useEffect } from "react";
 import axios from "axios";
-import ProductGrid from "@/components/products/ProductGrid";
-import { useSession } from "next-auth/react";
-import LoadingErrorComponent from "@/components/Loader/LoadingErrorComponent";
+ import LoadingErrorComponent from "@/components/Loader/LoadingErrorComponent";
+ import { Suspense } from "react";
+ import CategoryPageClient from "./CategoryPageClient";
 
-export default function CategoryPage({ params }) {
-  const { brand } = params;
-  const [products, setProducts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const [wishlist, setWishlist] = useState([]);
-  const { data: session } = useSession();
+ export default async function CategoryPage({ params }) {
+   const { brand } = params;
+   let products = [];
+   let error = null;
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        setLoading(true);
-        const res = await axios.get(`/api/products/brand/${brand}`);
-        setProducts(res.data);
-      } catch (error) {
-        console.log(error);
-        setError("Error loading products", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchProducts();
-  }, [brand]);
+   // Check if brand is undefined
+   if (!brand) {
+     console.error("Brand is undefined in CategoryPage");
+     error = "Invalid brand";
+     return (
+       <div className="flex flex-col min-h-screen">
+         <main className="flex-grow container mx-auto px-4 py-8">
+           <LoadingErrorComponent loading={false} error={error} />
+         </main>
+       </div>
+     );
+   }
 
-  useEffect(() => {
-    const fetchWishlist = async () => {
-      if (session) {
-        try {
-          const res = await axios.get("/api/wishlist");
-          if (Array.isArray(res.data.items)) {
-            setWishlist(res.data.items.map((item) => item._id));
-          }
-        } catch (error) {
-          console.log(error);
-        }
-      }
-    };
-    fetchWishlist();
-  }, [session]);
+   try {
+     const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/products/brand/${brand}`);
+     products = res.data;
+   } catch (err) {
+     console.error(err);
+     error = "Error loading products";
+   }
 
-  const handleWishlistUpdate = (productId, isAdding) => {
-    if (isAdding) {
-      setWishlist([...wishlist, productId]);
-    } else {
-      setWishlist(wishlist.filter((id) => id !== productId));
-    }
-  };
+   return (
+     <div className="flex flex-col min-h-screen">
+       <main className="flex-grow container mx-auto px-4 py-8">
+         {error ? (
+           <LoadingErrorComponent loading={false} error={error} />
+         ) : (
+           <Suspense fallback={<LoadingErrorComponent loading={true} error={null} />}>
+             <CategoryPageClient products={products} brand={brand} />
+           </Suspense>
+         )}
+       </main>
+     </div>
+   );
+ }
 
-  if (loading || error) {
-    return <LoadingErrorComponent loading={loading} error={error} />;
-  }
-
-  return (
-    <div className="flex flex-col min-h-screen">
-      <main className="flex-grow container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold text-slate-700 mb-4 uppercase">
-          {brand} Watches
-        </h1>
-        <p className="mb-6 text-slate-700">
-          Total Watches Available: {products.length}
-        </p>
-        <ProductGrid
-          products={products}
-          wishlist={wishlist}
-          onWishlistUpdate={handleWishlistUpdate}
-        />
-      </main>
-    </div>
-  );
-}

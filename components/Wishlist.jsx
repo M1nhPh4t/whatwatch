@@ -15,17 +15,18 @@ const Wishlist = () => {
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
   const addItem = useCartStore((state) => state.addItem);
-  const obeserver = useRef();
+  const observer = useRef();
 
   const lastItemElementRef = useCallback(
     (node) => {
       if (loading) return;
-      if (obeserver.current) obeserver.current.disconnect();
-      obeserver.current = new IntersectionObserver((entries) => {
+      if (observer.current) observer.current.disconnect();
+      observer.current = new IntersectionObserver((entries) => {
         if (entries[0].isIntersecting && hasMore) {
           setPage((prevPage) => prevPage + 1);
         }
       });
+      if (node) observer.current.observe(node);
     },
     [loading, hasMore]
   );
@@ -35,18 +36,19 @@ const Wishlist = () => {
       try {
         setLoadingMore(true);
         await new Promise((resolve) => setTimeout(resolve, 1500));
-        const res = await axios.get(`/api/wishlist?page=${page}&limit=10`);
+        const res = await axios.get(`/api/wishlistAll?page=${page}&limit=10`);
         if (res.data && Array.isArray(res.data.items)) {
-          setWishlistItems((prevItem) => {
-            const newItem = res.data.items.filter(
-              (item) => !prevItem._id === item._id
+          setWishlistItems((prevItems) => {
+            const newItems = res.data.items.filter(
+              (item) => !prevItems.some((prevItem) => prevItem._id === item._id)
             );
-            return [...prevItem, ...newItem];
+            return [...prevItems, ...newItems];
           });
           setHasMore(res.data.hasMore);
         }
       } catch (error) {
-        console.log(error);
+        console.error("Error fetching wishlist:", error);
+        toast.error("Failed to load wishlist.");
       } finally {
         setLoading(false);
         setLoadingMore(false);
@@ -56,18 +58,19 @@ const Wishlist = () => {
     fetchWishlist();
   }, [page]);
 
-  const removeFromWishlist = async () => {
+  const removeFromWishlist = async (productId) => {
     try {
-      await axios.delete("/api/wishlist", { data: { productId } });
+      await axios.delete("/api/wishlistAll", { data: { productId } });
       toast.success("Removed from wishlist");
-      setWishlistItems((prevItem) =>
-        prevItem.filter((item) => item._id !== productId)
+      setWishlistItems((prevItems) =>
+        prevItems.filter((item) => item._id !== productId)
       );
       if (wishlistItems.length <= 10 && hasMore) {
         setPage((prevPage) => prevPage + 1);
       }
     } catch (error) {
-      console.log(error);
+      console.error("Error removing from wishlist:", error);
+      toast.error("Failed to remove from wishlist.");
     }
   };
 
@@ -93,7 +96,9 @@ const Wishlist = () => {
             <div
               key={item._id}
               ref={
-                index === wishlistItems.length - 1 ? lastItemElementRef : null
+                index === wishlistItems.length - 1
+                  ? lastItemElementRef
+                  : null
               }
               className="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 bg-gray-50 rounded-xl transition-all duration-300 hover:bg-gray-100 group animate-fadeIn"
             >

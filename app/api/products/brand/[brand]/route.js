@@ -8,30 +8,33 @@ export async function GET(req, { params }) {
   const { brand } = params;
 
   try {
-    function createFlexibleSearchPattern(input) {
-      const stripped = input.replace(/\s+/g, "").toLowerCase();
-      return stripped.split("").join("\\s*");
+    // Ensure brand is not empty or undefined
+    if (!brand || brand.trim() === "") {
+      return NextResponse.json(
+        { error: "Brand parameter is required" },
+        { status: 400 }
+      );
     }
 
-    const flexiblePattern = createFlexibleSearchPattern(brand);
-
-    const brandRegex = new RegExp(flexiblePattern, "i");
+    // Use a more straightforward regex for brand matching
+    const brandRegex = new RegExp(`^${brand}$`, "i"); // Exact match, case-insensitive
 
     const foundProducts = await Product.find({ brand: brandRegex })
       .populate("user")
       .sort({ createdAt: -1 });
 
-    if (foundProducts && foundProducts.length > 0) {
+    if (foundProducts.length > 0) {
       return NextResponse.json(foundProducts);
     } else {
-      return new NextResponse(
-        { error: "error fetching brand products with this name" },
+      return NextResponse.json(
+        { error: "No products found for this brand" },
         { status: 404 }
       );
     }
   } catch (error) {
-    return new NextResponse(
-      { error: "error fetching brand products" },
+    console.error("Error fetching brand products:", error); // Log the error for debugging
+    return NextResponse.json(
+      { error: "Error fetching brand products" },
       { status: 500 }
     );
   }

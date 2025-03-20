@@ -4,6 +4,7 @@ import { Product } from "@/utils/models/Product";
 
 export async function GET(req, { params }) {
   await connect();
+  console.log(params);
   const { productId } = params;
 
   try {
