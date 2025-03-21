@@ -4,7 +4,7 @@ import axios from "axios";
  import CategoryPageClient from "./CategoryPageClient";
 
  export default async function CategoryPage({ params }) {
-   const { brand } = params;
+   const { brand } = await params;
    let products = [];
    let error = null;
 
@@ -22,7 +22,7 @@ import axios from "axios";
    }
 
    try {
-     const res = await axios.get(`${process.env.NEXT_PUBLIC_BASE_URL}/api/products/brand/${brand}`);
+     const res = await axios.get(`${process.env.NEXT_PUBLIC_URL}/api/products/brand/${brand}`);
      products = res.data;
    } catch (err) {
      console.error(err);

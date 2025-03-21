@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 export async function GET(req, { params }) {
   await connect();
 
-  const { brand } = params;
+  const { brand } = await params;
 
   try {
     // Ensure brand is not empty or undefined
