@@ -37,6 +37,7 @@ export async function GET(req) {
       user: session.user._id,
       "cartProducts.product": objectIdProductId,
       status: "delivered",
+      paid: true,
     });
 
     if (!hasPurchased) {
