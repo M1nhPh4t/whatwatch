@@ -2,11 +2,11 @@
 
 import React, { useEffect, useState } from "react";
 import useCartStore from "../store/cartStore";
-import Link from "next/link";
-import { Button } from "./ui/button";
+import { useSession } from "next-auth/react"; // Import useSession
 import Cart from "./Cart";
 
 const CartIconNav = () => {
+  const { data: session } = useSession(); // Lấy session
   const [isLoading, setIsLoading] = useState(true);
   const [itemCount, setItemCount] = useState(0);
   const { items, getTotalItems } = useCartStore();
@@ -17,8 +17,8 @@ const CartIconNav = () => {
     setItemCount(getTotalItems());
   }, [items, getTotalItems]);
 
-  if (isLoading) {
-    return null; // Or a loading placeholder if you prefer
+  if (isLoading || !session) {
+    return null; // Nếu chưa load xong hoặc chưa đăng nhập, không hiển thị gì cả
   }
 
   return (
@@ -56,9 +56,10 @@ const CartIconNav = () => {
           </div>
         </div>
       </nav>
-      <div className=" absolute right-20 bg-slate-100 ">{cart && <Cart />}</div>
+      <div className="absolute right-20 bg-slate-100">{cart && <Cart />}</div>
     </div>
   );
 };
 
 export default CartIconNav;
+

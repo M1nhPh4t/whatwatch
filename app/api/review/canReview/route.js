@@ -37,13 +37,12 @@ export async function GET(req) {
       user: session.user._id,
       "cartProducts.product": objectIdProductId,
       status: "delivered",
-      paid: true,
     });
 
     if (!hasPurchased) {
       console.log("user has not purchased the product");
 
-      return NextResponse.json({ canReview: false }, { status: 200 });
+      return NextResponse.json({ canReview: true }, { status: 200 });
     }
 
     const hasReviewd = await Review.findOne({
