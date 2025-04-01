@@ -66,7 +66,7 @@ export async function POST(req) {
     }
 
     product.reviews.push(newReview._id);
-    product.numReviews = product.review.length;
+    product.numReviews = product.reviews.length;
     const allReveiws = await Review.find({ product: objectIdProductId });
     const avgRating =
       allReveiws.reduce((acc, item) => item.rating + acc, 0) /
@@ -193,7 +193,7 @@ export async function DELETE(req) {
 
     product.reviews = product.review.filter((r) => r.toString() !== reviewId);
 
-    product.numReviews = product.review.length;
+    product.numReviews = product.reviews.length;
 
     if (product.numReviews > 0) {
       const allReviews = await Review.find({ product: productId });

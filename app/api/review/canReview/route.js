@@ -15,7 +15,7 @@ export async function GET(req) {
       return NextResponse.json({ canReview: false }, { status: 200 });
     }
     const { searchParams } = new URL(req.url);
-
+    
     const productId = searchParams.get("productId");
 
     if (!productId) {
@@ -42,15 +42,14 @@ export async function GET(req) {
 
     if (!hasPurchased) {
       console.log("user has not purchased the product");
-
       return NextResponse.json({ canReview: true }, { status: 200 });
     }
-
-    const hasReviewd = await Review.findOne({
+    
+    const hasReviewed = await Review.findOne({
       user: session.user._id,
       product: objectIdProductId,
     });
-    return NextResponse.json({ canReview: !hasReviewd }, { status: 200 });
+    return NextResponse.json({ canReview: !hasReviewed }, { status: 200 });
   } catch (error) {
     return NextResponse.json(
       { error: "internal server error at the review api route can review" },

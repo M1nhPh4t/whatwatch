@@ -47,21 +47,17 @@ const ReviewSection = ({ productId }) => {
   );
 
   const fetchAllReviews = useCallback(async () => {
-    async ()=> {
-      try {
-        setLoading(true);
-        const res = await axios.get(
-          `/api/review/allReviews?productId=${productId}`
-        );
-        setAllReviews(res.data.reviews);
-      } catch (error) {
-        console.log(error);
-        setError("failed to load all reviews")
-        
-      } finally {
-        setLoading(false)
-      }
-
+    try {
+      setLoading(true);
+      const res = await axios.get(
+        `/api/review/allReviews?productId=${productId}`
+      );
+      setAllReviews(res.data.reviews);
+    } catch (error) {
+      console.log(error);
+      setError("failed to load all reviews");
+    } finally {
+      setLoading(false);
     }
   }, [productId]);
 

@@ -30,7 +30,7 @@ const orderSchema = new mongoose.Schema(
     },
     paid: {
       type: Boolean,
-      default: false,
+      default: true,
     },
     cartProducts: [
       {

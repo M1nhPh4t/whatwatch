@@ -101,7 +101,7 @@ export async function POST(req) {
         postalCode,
         streetAddress, // Ensure this matches the field name in the schema
         country,
-        paid: false,
+        paid: true,
         cartProducts: orderCartProducts,
         total,
         user,
